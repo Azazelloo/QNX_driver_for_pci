@@ -10,7 +10,7 @@
 #define DeviceID 0x502
 #define BAR 0xf0200000
 
-#define RG_VME_BASE_ADD_RAM	*((volatile unsigned char*)((unsigned)VLK_RG_va+0x314))
+#define RG_VME_BASE_ADD_RAM	*((volatile unsigned char*)((unsigned)VLK_RG_va+(0x400)))
 
 
 int main(int argc, char *argv[]) {
@@ -62,20 +62,23 @@ int main(int argc, char *argv[]) {
 	 /*Config to PCI device*/
 	        struct _pci_cardbus_config_regs cfg_space;
 	        pci_read_config(device.pcidevhandle,0,0x40,4,&cfg_space);//заполняем структуру конфигурации устройства
-	        void* ptr;//указатель на начало адресного пространства
-	        pci_read_config(device.pcidevhandle,0x10,2,4,&ptr);
+	       // void* ptr;//указатель на начало адресного пространства
+	      //  pci_read_config(device.pcidevhandle,0x10,2,4,&ptr);
 
-	        void* p_space1;
-	        p_space1 = mmap_device_memory(0, 0x100, PROT_READ | PROT_WRITE | PROT_NOCACHE,0,BAR);
-	    	if (p_space1 == MAP_FAILED){
+	        void* VLK_RG_va;
+	        VLK_RG_va = mmap_device_memory(0, 0x1000, PROT_READ | PROT_WRITE | PROT_NOCACHE,0,device.pcidevice_info.PciBaseAddress[0]);
+	    	if (VLK_RG_va == MAP_FAILED){
 
 	    		std::cout<<"MAP_FAILED"<<std::endl;
 	    		return EXIT_SUCCESS;
 	    	}
-	    	//char* p=static_cast<char*>(VLK_RG_va);
+/**/
+	    	//char* p=static_cast<char*>(p_space1);
 	    	//*p=100;
-	    	//char tt =RG_VME_BASE_ADD_RAM;
-	        //RG_VME_BASE_ADD_RAM=0;
+	    	RG_VME_BASE_ADD_RAM=1;
+	    	RG_VME_BASE_ADD_RAM=1;
+	    	char tt =RG_VME_BASE_ADD_RAM;
+	        RG_VME_BASE_ADD_RAM=0;
 
 
 	        /*unsigned devfunc;
