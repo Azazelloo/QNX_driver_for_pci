@@ -1,5 +1,7 @@
 #include <cstdlib>
 #include <string.h>
+#include <unistd.h>
+#include <math.h>
 #include <iostream>
 #include <hw/pci.h>
 #include <sys/neutrino.h>
@@ -10,4 +12,4 @@
 #define VendorID 0x1172
 #define DeviceID 0x502
 
-void AsyncDOUT(unsigned* p_pci_mem,int state_dout);
+void AsyncDOUT(unsigned* p_pci_mem,int state_dout); //Асинхронное управление DOUT
