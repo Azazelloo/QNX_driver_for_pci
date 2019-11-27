@@ -30,9 +30,8 @@ int main(int argc, char *argv[])
 		pci_mem = (unsigned *)mmap_device_memory(NULL, pci_info.BaseAddressSize[0],PROT_READ|PROT_WRITE|PROT_NOCACHE,0, PCI_MEM_ADDR(pci_info.CpuBaseAddress[0]));
 
 		//____DOUT выставляем уровни в асинхронном режиме
-		//*pci_mem=0x00000001; //сброс l502 для повторного сбора данных ????
 		/*AsyncDOUT(pci_mem,0x0000000);//обнуляем плату
-		AsyncDOUT(pci_mem,0x00000100);/**/
+		AsyncDOUT(pci_mem,0x00000000);/**/
 
 		//____DOUT в импульсном режиме
 		//____подготовка DOUT
@@ -67,27 +66,25 @@ int main(int argc, char *argv[])
 		pci_mem+=0x00000700+3; //регистр DMA_RST
 		*pci_mem=0x00000002;
 		pci_mem-=0x00000700+3;
-		/**/
 
 		//____Создание буфера
-		unsigned int impulse_array[5];
+		unsigned int impulse_array[100];
 		unsigned int *p_ar=impulse_array;
-		impulse_array[0]=0x00000100;
-		impulse_array[1]=0x00000100;
-		impulse_array[2]=0x00000100;
-		impulse_array[3]=0x00000000;
-		impulse_array[4]=0x00000000;
+		for(int i=0;i<100;i++)
+		{
+			impulse_array[i]=0x00000100;
+		}
 
 		//____Заполняем дескрипторы страниц
 		std::cout<<"RAM addr = "<<p_ar<<std::endl;
 		pci_mem+=0x00000c00+16; //1-ый регистр 0-ой страницы
-		*pci_mem=reinterpret_cast<uintptr_t>(p_ar);
+		*pci_mem=reinterpret_cast<unsigned int>(p_ar);
 
 		pci_mem+=1;
 		*pci_mem=0;
 
 		pci_mem+=1;
-		*pci_mem=5;
+		*pci_mem=100;
 
 		pci_mem+=1;
 		*pci_mem=0;
@@ -96,16 +93,16 @@ int main(int argc, char *argv[])
 		pci_mem-=3;
 		pci_mem-=16;//возврат в начало блока памяти канала
 		pci_mem+=1; //регистр прерываний DMA_CH_CMP_CNTR
-		*pci_mem=5;
+		*pci_mem=50;
 
 		pci_mem-=1;//регистр режима работы канала DMA_CH_CTL
-		*pci_mem=0x80010020;
+		*pci_mem=0x00010020;
 
 		pci_mem-=0x00000c00;
-		pci_mem+=0x00000700+4; //регистр DMA_IRQ_EN
+		pci_mem+=0x00000700+5; //регистр DMA_IRQ_EN
 		*pci_mem=0x00000002;
 
-		pci_mem-=4;
+		pci_mem-=5;
 		pci_mem+=1; //регистр запуска каналов
 		*pci_mem=0x00000002;
 
@@ -116,7 +113,6 @@ int main(int argc, char *argv[])
 		/**/
 
 		//____Вывод регистров на экран
-		//pci_mem+=0x00000200+0x00000112;
 		for(int i = 1; i <= 6; i++)
 			{
 				std::cout<<"["<<i-1<<"] = "<<*(pci_mem + (i-1))<<" = "<<pci_mem + (i-1)<<std::endl;
