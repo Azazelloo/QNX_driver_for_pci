@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 		/*AsyncDOUT(pci_mem,0x00000000);/**/
 
 		//____DOUT в импульсном режиме
-		InitSetDev(pci_mem,0x00000002); //производим первоначальную настройку DOUT
+		/*InitSetDev(pci_mem,0x00000002); //производим первоначальную настройку DOUT
 
 		//____Создание буфера
 		int buf_frame=1;
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 		impulse_array[1]=0x00000001;
 		impulse_array[2]=0x00000001;
 		impulse_array[3]=0x00000001;
-		impulse_array[4]=0x00000001;
+		impulse_array[4]=0x00000000;
 		impulse_array[5]=0x00000000;
 		impulse_array[6]=0x00000000;
 		impulse_array[7]=0x00000000;
@@ -55,11 +55,35 @@ int main(int argc, char *argv[])
 		mem_offset64(&impulse_array,NOFD,sizeof(impulse_array),&offset,0);//получаем физический адрес буфера
 		StreamsEnable(pci_mem,offset,buf_size,buf_frame*buf_size,0x00000002); //запускаем одиночный поток на запись
 		StreamsStart(pci_mem,0x00000002);
-		sleep(1);
+		delay(1);
 		StreamsStop(pci_mem,0x00000002);
 		/**/
+		//____ПРОШИВКА BLACKFIN
+
+		//____предварительный сброс и запуск bf
+		pci_mem+=0; // BF_CTL
+		*pci_mem=0x00000000;
+		delay(1);
+		*pci_mem=0x00000002;
+
+		while(*pci_mem & 0x00000004)
+		{
+			cout<<"BF_HWAIT..."<<endl;
+			//ожидаем нуля в регистре BF_HWAIT
+		}
+
+		//___добавить проверку BF_REQ_BUSY (!!!)
+
+		//разбираем файл прошивки и записываем соответствующие регистры
+		FILE * ptrFile = fopen("/home/l502-bf.ldr", "rb");
+		int r_buff[4];
+		fread(r_buff,sizeof(r_buff[0]),4,ptrFile);
+
+		pci_mem+=128;//BF_REQ_DATA (1-ый регистр)
+		*pci_mem=r_buff[0];
+		/**/
 		//____Вывод регистров на экран
-		for(int i = 1; i <=16; i++)
+		for(int i = 1; i <=8; i++)
 			{
 				std::cout<<"["<<i-1<<"] = "<<*(pci_mem + (i-1))<<" = "<<pci_mem + (i-1)<<std::endl;
 			}
