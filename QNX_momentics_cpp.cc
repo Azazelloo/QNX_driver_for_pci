@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 		//____предварительный сброс и запуск bf
 		pci_mem+=0; // BF_CTL
 		*pci_mem=0x00000000;
-		delay(1);
+		delay(5);
 		*pci_mem=0x00000002;
 
 		while(*pci_mem & 0x00000004)
@@ -71,21 +71,112 @@ int main(int argc, char *argv[])
 			cout<<"BF_HWAIT..."<<endl;
 			//ожидаем нуля в регистре BF_HWAIT
 		}
-
-		//___добавить проверку BF_REQ_BUSY (!!!)
-
-		//разбираем файл прошивки и записываем соответствующие регистры
+		//____разбираем файл прошивки и записываем соответствующие регистры
 		FILE * ptrFile = fopen("/home/l502-bf.ldr", "rb");
-		int r_buff[4];
-		fread(r_buff,sizeof(r_buff[0]),4,ptrFile);
+		fseek(ptrFile, 0, SEEK_END);   // устанавливаем позицию в конец файла
+		long lSize = ftell(ptrFile)/4; // получаем размер в байтах, делим на размер int
+		rewind(ptrFile);
 
-		pci_mem+=128;//BF_REQ_DATA (1-ый регистр)
-		*pci_mem=r_buff[0];
+		unsigned int* r_buff=new unsigned int [lSize];
+		fread(r_buff,sizeof(r_buff[0]),lSize,ptrFile);
+		//____конвертим в BIG ENDIAN
+		/*for(int i=0; i<lSize;i++)
+		{
+			r_buff[i]=(r_buff[i] << 24) | (((r_buff[i] << 16) >> 24) << 16) | (((r_buff[i] << 8) >> 24) << 8) | (r_buff[i] >> 24);
+		}/**/
+
+		int num_full_rec = lSize / 128; // количество полных записей в буфер по 128 слов
+		int balance_rec = lSize - (num_full_rec * 128); // остаток СЛОВ (не байт!) не вошедших в последний полный буфер
+
+		if (balance_rec) // есть остаток буфера
+		{
+			int counter_ldr_array = 0,i;
+			for (i = 1; i <= num_full_rec; i++) //записываем полные буферы
+			{
+				//____непосредственно, запись
+				pci_mem+=2; //BF_STATUS
+				while(*pci_mem & 0x00000002) // ожидаем окончания предыдущей записи
+					{
+						cout<<"BF_REQ_BUSY..."<<endl;
+						//ожидаем нуля в регистре BF_REQ_BUSY
+					}
+				cout<<"BF_REQ_BUSY done:"<<*pci_mem<<endl;
+
+				pci_mem-=2; // в начало блока
+				pci_mem+=128; //первый регистр BF_REQ_DATA
+
+				//____запись 128 регистров
+				for (int j=counter_ldr_array;j<i*128;j++)
+				{
+					pci_mem+=(j-(i-1)*128); //двигаем на регистр
+					*pci_mem=r_buff[j];
+					//cout <<dec<<j<<" = "<< hex << r_buff[j] << endl;
+					pci_mem-=(j-(i-1)*128); // в начало блока
+				}
+
+				counter_ldr_array+=128; //двигаем на 128 по массиву для записи следующего блока регистров
+
+				pci_mem-=128; //в начало блока
+
+				pci_mem+=6; //BF_REQ_SIZE
+				*pci_mem=128;
+				pci_mem-=6; // в начало блока
+
+				pci_mem+=5; // BF_REQ_ADDR
+				*pci_mem=0xFF8007FF+2;//0x00000128;
+				pci_mem-=5; // в начало блока
+
+				pci_mem+=1; //BF_CMD
+				*pci_mem=2; //код L502_BF_CMD_WRITE
+				pci_mem-=1; //в начало блока
+
+			}
+			//___подаем необходимую команду
+			pci_mem+=1; //BF_CMD
+			*pci_mem=4; // L502_BF_CMD_HIRQ
+			pci_mem-=1; //в начало блока
+
+			//___записываем остаток
+			pci_mem+=2; //BF_STATUS
+			while(*pci_mem & 0x00000002) // ожидаем окончания предыдущей записи
+				{
+					cout<<"BF_REQ_BUSY_Balance..."<<endl;
+					//ожидаем нуля в регистре BF_REQ_BUSY
+				}
+			cout<<"BF_REQ_BUSY_LAST done:"<<*pci_mem<<endl;
+
+			pci_mem-=2; // в начало блока
+			pci_mem+=128; //первый регистр BF_REQ_DATA
+			int counter=0;
+			for (int j=counter_ldr_array;j<(counter_ldr_array+balance_rec);j++)
+				{
+					pci_mem+=counter; //двигаем на регистр
+					*pci_mem=r_buff[j];
+					//cout <<dec<<j<<" = "<< hex << r_buff[j] << endl;
+					pci_mem-=counter; // в начало блока
+					counter++;
+				}
+			pci_mem-=128; //в начало блока
+
+			pci_mem+=6; //BF_REQ_SIZE
+			*pci_mem=balance_rec;
+			pci_mem-=6; // в начало блока
+
+			pci_mem+=5; // BF_REQ_ADDR
+			*pci_mem=0xFF8007FF+2;//0x00000128;
+			pci_mem-=5; // в начало блока
+
+			pci_mem+=1; //BF_CMD
+			*pci_mem=2; //код L502_BF_CMD_WRITE
+			pci_mem-=1; //в начало блока
+		}
 		/**/
 		//____Вывод регистров на экран
-		for(int i = 1; i <=8; i++)
+		for(int i = 1; i <=256; i++)// выходим за область на 1 регистр для наглядности
 			{
 				std::cout<<"["<<i-1<<"] = "<<*(pci_mem + (i-1))<<" = "<<pci_mem + (i-1)<<std::endl;
 			}
-			/**/
+
+		delete[] r_buff;
+
 }
