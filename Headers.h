@@ -12,6 +12,17 @@
 
 using namespace std;
 
+typedef struct st_bf_ldr_pkt
+{
+    uint8_t res;
+    uint8_t dma_mode;
+    uint16_t flags;
+    uint32_t addr;
+    uint32_t size;
+    uint32_t arg;
+} t_bf_ldr_pkt;
+
+
 #define VendorID 0x1172
 #define DeviceID 0x502
 
