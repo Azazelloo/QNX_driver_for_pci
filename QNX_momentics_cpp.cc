@@ -60,8 +60,7 @@ int main(int argc, char *argv[])
 		StreamsStop(pci_mem,0x00000002);
 		/**/
 		//____ПРОШИВКА BF
-
-		//cout<<"bf_loader = "<<BF_loader(pci_mem)<<endl;
+		cout<<"bf_loader = "<<BF_loader(pci_mem)<<endl;
 
 		//____Вывод регистров на экран
 		/*for(int i = 1; i <=256; i++)

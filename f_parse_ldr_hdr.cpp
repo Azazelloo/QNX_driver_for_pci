@@ -22,7 +22,7 @@ int f_parse_ldr_hdr(uint8_t* hdr, t_bf_ldr_pkt* pkt)
 	    pkt->flags = pdw_buff[0]&0xFFF0;
 	    pkt->addr = pdw_buff[1];
 	    pkt->size = pdw_buff[2];
-	    pkt->arg = pdw_buff[3];
+	    pkt->arg = pdw_buff[3]; // данные для заполнения (?)
 
 	    if ((pkt->flags & 0x0800) && (pkt->flags & 0x0100))
 	        err = L502_ERR_LDR_FILE_FORMAT;
