@@ -1,4 +1,4 @@
-#include "Headers.h"
+п»ї#include "Headers.h"
 
 int main(int argc, char *argv[])
 {
@@ -8,8 +8,8 @@ int main(int argc, char *argv[])
 		int pd;
 		unsigned *pci_mem;
 
-		//____ПОДКЛЮЧЕНИЕ К PCI ШИНЕ
-		pd = pci_attach(0);//расписать подробнее
+		//____РџРћР”РљР›Р®Р§Р•РќРР• Рљ PCI РЁРРќР•
+		pd = pci_attach(0);//СЂР°СЃРїРёСЃР°С‚СЊ РїРѕРґСЂРѕР±РЅРµРµ
 
 		memset(&pci_info, 0, sizeof(pci_info));
 		pci_info.VendorId = vendor;
@@ -29,15 +29,15 @@ int main(int argc, char *argv[])
 
 		pci_mem = (unsigned *)mmap_device_memory(NULL, pci_info.BaseAddressSize[0],PROT_READ|PROT_WRITE|PROT_NOCACHE,0, PCI_MEM_ADDR(pci_info.CpuBaseAddress[0]));
 
-		//____DOUT выставляем уровни в асинхронном режиме
+		//____DOUT РІС‹СЃС‚Р°РІР»СЏРµРј СѓСЂРѕРІРЅРё РІ Р°СЃРёРЅС…СЂРѕРЅРЅРѕРј СЂРµР¶РёРјРµ
 		*pci_mem=0x00000000;
-		AsyncDOUT(pci_mem,0x00000000);//обнуляем DOUT
+		AsyncDOUT(pci_mem,0x00000000);//РѕР±РЅСѓР»СЏРµРј DOUT
 		/*AsyncDOUT(pci_mem,0x00000000);/**/
 
-		//____DOUT в импульсном режиме
-		/*InitSetDev(pci_mem,0x00000002); //производим первоначальную настройку DOUT
+		//____DOUT РІ РёРјРїСѓР»СЊСЃРЅРѕРј СЂРµР¶РёРјРµ
+		/*InitSetDev(pci_mem,0x00000002); //РїСЂРѕРёР·РІРѕРґРёРј РїРµСЂРІРѕРЅР°С‡Р°Р»СЊРЅСѓСЋ РЅР°СЃС‚СЂРѕР№РєСѓ DOUT
 
-		//____Создание буфера
+		//____РЎРѕР·РґР°РЅРёРµ Р±СѓС„РµСЂР°
 		int buf_frame=1;
 		const int buf_size=10;
 		int impulse_array[buf_size];
@@ -51,18 +51,18 @@ int main(int argc, char *argv[])
 		impulse_array[7]=0x00000000;
 		impulse_array[8]=0x00000000;
 		impulse_array[9]=0x00000000;
-		//____Заполняем дескрипторы страниц
+		//____Р—Р°РїРѕР»РЅСЏРµРј РґРµСЃРєСЂРёРїС‚РѕСЂС‹ СЃС‚СЂР°РЅРёС†
 		off64_t offset;
-		mem_offset64(&impulse_array,NOFD,sizeof(impulse_array),&offset,0);//получаем физический адрес буфера
-		StreamsEnable(pci_mem,offset,buf_size,buf_frame*buf_size,0x00000002); //запускаем одиночный поток на запись
+		mem_offset64(&impulse_array,NOFD,sizeof(impulse_array),&offset,0);//РїРѕР»СѓС‡Р°РµРј С„РёР·РёС‡РµСЃРєРёР№ Р°РґСЂРµСЃ Р±СѓС„РµСЂР°
+		StreamsEnable(pci_mem,offset,buf_size,buf_frame*buf_size,0x00000002); //Р·Р°РїСѓСЃРєР°РµРј РѕРґРёРЅРѕС‡РЅС‹Р№ РїРѕС‚РѕРє РЅР° Р·Р°РїРёСЃСЊ
 		StreamsStart(pci_mem,0x00000002);
 		delay(1);
 		StreamsStop(pci_mem,0x00000002);
 		/**/
-		//____ПРОШИВКА BF
+		//____РџР РћРЁРР’РљРђ BF
 		cout<<"bf_loader = "<<BF_loader(pci_mem)<<endl;
 
-		//____Вывод регистров на экран
+		//____Р’С‹РІРѕРґ СЂРµРіРёСЃС‚СЂРѕРІ РЅР° СЌРєСЂР°РЅ
 		/*for(int i = 1; i <=256; i++)
 			{
 				std::cout<<"["<<i-1<<"] = "<<*(pci_mem + (i-1))<<" = "<<pci_mem + (i-1)<<std::endl;
