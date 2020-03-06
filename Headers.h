@@ -1,4 +1,4 @@
-#include <cstdlib>
+п»ї#include <cstdlib>
 #include <string.h>
 #include <unistd.h>
 #include <math.h>
@@ -28,7 +28,7 @@ typedef struct st_bf_ldr_pkt
 
 #define BF_ldr_filename "/home/l502-bf.ldr"
 
-/*ошибки*/
+/*РѕС€РёР±РєРё*/
 #define L502_ERR_LDR_FILE_FORMAT 			 -1
 #define L502_ERR_LDR_FILE_UNSUP_FEATURE 	 -2
 #define L502_ERR_LDR_FILE_UNSUP_STARTUP_ADDR -3
@@ -36,13 +36,13 @@ typedef struct st_bf_ldr_pkt
 #define L502_ERR_BF_INVALID_ADDR			 -5
 #define L502_ERR_LDR_FILE_OPEN				 -6
 
-/*блоки памяти*/
+/*Р±Р»РѕРєРё РїР°РјСЏС‚Рё*/
 #define GEN_REGS_DMA 0x00000700
 #define DMA_IN 		 0x00000800
 #define DMA_OUT		 0x00000c00
 #define IO_HARD		 0x00000200
 
-/*общие регистры каналов*/
+/*РѕР±С‰РёРµ СЂРµРіРёСЃС‚СЂС‹ РєР°РЅР°Р»РѕРІ*/
 #define DMA_EN  	1
 #define DMA_DIS     2
 #define DMA_RST     3
@@ -50,19 +50,19 @@ typedef struct st_bf_ldr_pkt
 #define DMA_IRQ_EN  5
 #define DMA_IRQ_DIS 6
 
-/*отдельные регистры каналов*/
+/*РѕС‚РґРµР»СЊРЅС‹Рµ СЂРµРіРёСЃС‚СЂС‹ РєР°РЅР°Р»РѕРІ*/
 #define DMA_CH_CTL 		0
 #define DMA_CH_CMP_CNTR 1
 #define DMA_CH_CUR_CNTR 2
 #define DMA_CH_CUR_POS  3
 #define DMA_CH_PC_POS	4
 
-/*регистры управления вводом/выводом*/
+/*СЂРµРіРёСЃС‚СЂС‹ СѓРїСЂР°РІР»РµРЅРёСЏ РІРІРѕРґРѕРј/РІС‹РІРѕРґРѕРј*/
 #define GO_SYNC_IO 	  0x0000010a
 #define OUTSWAP_BFCTL 0x00000118
 #define PRELOAD_ADC	  0x0000010c
 
-/*регистры BF_control*/
+/*СЂРµРіРёСЃС‚СЂС‹ BF_control*/
 #define BF_CTL 		  0
 #define BF_CMD		  1
 #define BF_STATUS	  2
@@ -70,24 +70,24 @@ typedef struct st_bf_ldr_pkt
 #define BF_REQ_SIZE	  6
 #define BF_REQ_ADDR	  5
 
-/*флаги для запуска прошивки (значение неизвестно)*/
+/*С„Р»Р°РіРё РґР»СЏ Р·Р°РїСѓСЃРєР° РїСЂРѕС€РёРІРєРё (Р·РЅР°С‡РµРЅРёРµ РЅРµРёР·РІРµСЃС‚РЅРѕ)*/
 #define BF_LDR_FLAG_FILL 	0x0100
 #define BF_LDR_FLAG_FINAL	0x8000
 #define BF_LDR_FLAG_IGNORE	0x1000
 
-//____проверка адреса память bf  который происходит запись (смотри ADSP-BF52x Memory Map)
+//____РїСЂРѕРІРµСЂРєР° Р°РґСЂРµСЃР° РїР°РјСЏС‚СЊ bf  РєРѕС‚РѕСЂС‹Р№ РїСЂРѕРёСЃС…РѕРґРёС‚ Р·Р°РїРёСЃСЊ (СЃРјРѕС‚СЂРё ADSP-BF52x Memory Map)
 #define BF_CHECK_ADDR(addr)  (((addr) < 0xFFA0C000) && ((addr)>= 0xFFA0000)) || \
     (((addr) < 0xFF908000) && ((addr) >=0xFF900000)) || \
     (((addr) < 0xFF808000) && ((addr) >=0xFF800000)) || \
     (((addr) < 0x2000000)) ? 0 : L502_ERR_BF_INVALID_ADDR
-//____проверка адреса со сдвигом на размер буфера
+//____РїСЂРѕРІРµСЂРєР° Р°РґСЂРµСЃР° СЃРѕ СЃРґРІРёРіРѕРј РЅР° СЂР°Р·РјРµСЂ Р±СѓС„РµСЂР°
 #define BF_CHECK_ADDR_SIZE(addr, size) BF_CHECK_ADDR(addr) ? L502_ERR_BF_INVALID_ADDR : \
 		BF_CHECK_ADDR(addr+size*4-1) ? L502_ERR_BF_INVALID_ADDR : 0
 
-/*прототипы функций*/
-void AsyncDOUT(unsigned* p_pci_mem,int state_dout); //Асинхронное управление DOUT
-void InitSetDev(unsigned* pci_mem, int num_chan); //первоначальная настройка канала (АЦП/ЦАП)
-void StreamsEnable(unsigned* pci_mem,off64_t buf_addr,int addr_size, int interrupt, int num_chan); //interrupt - количество сэмплов
+/*РїСЂРѕС‚РѕС‚РёРїС‹ С„СѓРЅРєС†РёР№*/
+void AsyncDOUT(unsigned* p_pci_mem,int state_dout); //РђСЃРёРЅС…СЂРѕРЅРЅРѕРµ СѓРїСЂР°РІР»РµРЅРёРµ DOUT
+void InitSetDev(unsigned* pci_mem, int num_chan); //РїРµСЂРІРѕРЅР°С‡Р°Р»СЊРЅР°СЏ РЅР°СЃС‚СЂРѕР№РєР° РєР°РЅР°Р»Р° (РђР¦Рџ/Р¦РђРџ)
+void StreamsEnable(unsigned* pci_mem,off64_t buf_addr,int addr_size, int interrupt, int num_chan); //interrupt - РєРѕР»РёС‡РµСЃС‚РІРѕ СЃСЌРјРїР»РѕРІ
 void StreamsStart(unsigned* pci_mem,int num_chan);
 void StreamsStop(unsigned* pci_mem,int num_chan);
 int BF_loader(unsigned* pci_mem);

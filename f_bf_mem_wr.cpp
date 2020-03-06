@@ -1,49 +1,49 @@
-#include "Headers.h"
+п»ї#include "Headers.h"
 
 int f_bf_mem_wr(unsigned* pci_mem,uint32_t addr, const uint32_t* regs, uint32_t size)
 {
 	int err=0;
 	pci_mem+=BF_STATUS;// BF_STATUS
-	while(*pci_mem & 0x00000002) //ожидаем завершения предыдущей команды
+	while(*pci_mem & 0x00000002) //РѕР¶РёРґР°РµРј Р·Р°РІРµСЂС€РµРЅРёСЏ РїСЂРµРґС‹РґСѓС‰РµР№ РєРѕРјР°РЅРґС‹
 	{
 		//cout<<"Wait BF_REQ_BUSY..."<<endl;
 	}
-	pci_mem-=BF_STATUS; // в начало блока
+	pci_mem-=BF_STATUS; // РІ РЅР°С‡Р°Р»Рѕ Р±Р»РѕРєР°
 
 	while(!err && size)
 	{
 		int i;
-		int put_size = (size < 128) ? size : 128; //128 регистров - максимальный блок для записи
+		int put_size = (size < 128) ? size : 128; //128 СЂРµРіРёСЃС‚СЂРѕРІ - РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№ Р±Р»РѕРє РґР»СЏ Р·Р°РїРёСЃРё
 
-		//_____записываем блок данных в ПЛИС
-		pci_mem+=BF_REQ_DATA; // начало блока BF_REQ_DATA
+		//_____Р·Р°РїРёСЃС‹РІР°РµРј Р±Р»РѕРє РґР°РЅРЅС‹С… РІ РџР›РРЎ
+		pci_mem+=BF_REQ_DATA; // РЅР°С‡Р°Р»Рѕ Р±Р»РѕРєР° BF_REQ_DATA
 		for (i=0; i < put_size; i++)
 		{
 			pci_mem+=i;
-			*pci_mem=regs[i]; // пишем int (!)
+			*pci_mem=regs[i]; // РїРёС€РµРј int (!)
 			pci_mem-=i;
 		}
-		pci_mem-=BF_REQ_DATA; //в начало блока
-		//_____записываем параметры передачи - размер и адрес в памяти BF
+		pci_mem-=BF_REQ_DATA; //РІ РЅР°С‡Р°Р»Рѕ Р±Р»РѕРєР°
+		//_____Р·Р°РїРёСЃС‹РІР°РµРј РїР°СЂР°РјРµС‚СЂС‹ РїРµСЂРµРґР°С‡Рё - СЂР°Р·РјРµСЂ Рё Р°РґСЂРµСЃ РІ РїР°РјСЏС‚Рё BF
 		pci_mem+=BF_REQ_SIZE; //BF_REQ_SIZE
 		*pci_mem=put_size;
-		pci_mem-=BF_REQ_SIZE; //в начало блока
+		pci_mem-=BF_REQ_SIZE; //РІ РЅР°С‡Р°Р»Рѕ Р±Р»РѕРєР°
 
 		pci_mem+=BF_REQ_ADDR; //BF_REQ_ADDR
 		*pci_mem= addr;
-		pci_mem-=BF_REQ_ADDR; //в начало блока
+		pci_mem-=BF_REQ_ADDR; //РІ РЅР°С‡Р°Р»Рѕ Р±Р»РѕРєР°
 
 		pci_mem+=BF_CMD; //BF_CMD
 		*pci_mem=0x0002;
-		pci_mem-=BF_CMD;// в начало блока
+		pci_mem-=BF_CMD;// РІ РЅР°С‡Р°Р»Рѕ Р±Р»РѕРєР°
 
-		//_____ожидание завершения операции
+		//_____РѕР¶РёРґР°РЅРёРµ Р·Р°РІРµСЂС€РµРЅРёСЏ РѕРїРµСЂР°С†РёРё
 		pci_mem+=BF_STATUS;// BF_STATUS
-		while(*pci_mem & 0x00000002) //ожидаем завершения предыдущей команды
+		while(*pci_mem & 0x00000002) //РѕР¶РёРґР°РµРј Р·Р°РІРµСЂС€РµРЅРёСЏ РїСЂРµРґС‹РґСѓС‰РµР№ РєРѕРјР°РЅРґС‹
 		{
 			//cout<<"Wait BF_REQ_BUSY..."<<endl;
 		}
-		pci_mem-=BF_STATUS; // в начало блока
+		pci_mem-=BF_STATUS; // РІ РЅР°С‡Р°Р»Рѕ Р±Р»РѕРєР°
 
 		if(!err)
 		{

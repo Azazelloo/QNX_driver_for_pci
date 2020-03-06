@@ -1,38 +1,38 @@
-#include "Headers.h"
+п»ї#include "Headers.h"
 void InitSetDev(unsigned* pci_mem, int num_chan)
 {
-	pci_mem+=GEN_REGS_DMA+DMA_EN; //регистр DMA_EN
-	if((*pci_mem) & num_chan) //если канал включен -> сбрасываем
+	pci_mem+=GEN_REGS_DMA+DMA_EN; //СЂРµРіРёСЃС‚СЂ DMA_EN
+	if((*pci_mem) & num_chan) //РµСЃР»Рё РєР°РЅР°Р» РІРєР»СЋС‡РµРЅ -> СЃР±СЂР°СЃС‹РІР°РµРј
 	{
-		pci_mem+=1; //попадаем в DMA_DIS
+		pci_mem+=1; //РїРѕРїР°РґР°РµРј РІ DMA_DIS
 		*pci_mem=num_chan;
 		pci_mem-=1;
 	}
-	pci_mem-=DMA_EN; // в начало блока
+	pci_mem-=DMA_EN; // РІ РЅР°С‡Р°Р»Рѕ Р±Р»РѕРєР°
 
-	pci_mem+=DMA_IRQ_DIS; //регистр DMA_IRQ_DIS
+	pci_mem+=DMA_IRQ_DIS; //СЂРµРіРёСЃС‚СЂ DMA_IRQ_DIS
 	*pci_mem=num_chan;
-	pci_mem-=DMA_IRQ_DIS; // в начало блока
+	pci_mem-=DMA_IRQ_DIS; // РІ РЅР°С‡Р°Р»Рѕ Р±Р»РѕРєР°
 
-	pci_mem+=DMA_IRQ; //регистр DMA_IRQ
-	*pci_mem=num_chan; //записываются 1 в те каналы которые активны
-	pci_mem-=DMA_IRQ; //в начало блока
+	pci_mem+=DMA_IRQ; //СЂРµРіРёСЃС‚СЂ DMA_IRQ
+	*pci_mem=num_chan; //Р·Р°РїРёСЃС‹РІР°СЋС‚СЃСЏ 1 РІ С‚Рµ РєР°РЅР°Р»С‹ РєРѕС‚РѕСЂС‹Рµ Р°РєС‚РёРІРЅС‹
+	pci_mem-=DMA_IRQ; //РІ РЅР°С‡Р°Р»Рѕ Р±Р»РѕРєР°
 
-	pci_mem-=GEN_REGS_DMA; //возвращаемся в начало блока памяти
-	pci_mem+=DMA_OUT+DMA_CH_CUR_CNTR; //регистр DMA_CH_CUR_CNTR (сколько слов передано)
+	pci_mem-=GEN_REGS_DMA; //РІРѕР·РІСЂР°С‰Р°РµРјСЃСЏ РІ РЅР°С‡Р°Р»Рѕ Р±Р»РѕРєР° РїР°РјСЏС‚Рё
+	pci_mem+=DMA_OUT+DMA_CH_CUR_CNTR; //СЂРµРіРёСЃС‚СЂ DMA_CH_CUR_CNTR (СЃРєРѕР»СЊРєРѕ СЃР»РѕРІ РїРµСЂРµРґР°РЅРѕ)
 	*pci_mem=0;
-	pci_mem-=DMA_CH_CUR_CNTR; //в начало блока
+	pci_mem-=DMA_CH_CUR_CNTR; //РІ РЅР°С‡Р°Р»Рѕ Р±Р»РѕРєР°
 
-	pci_mem+=DMA_CH_CUR_POS; //регистр DMA_CH_CUR_POS (номер страницы и смещение внутри страницы для следующей передачи)
+	pci_mem+=DMA_CH_CUR_POS; //СЂРµРіРёСЃС‚СЂ DMA_CH_CUR_POS (РЅРѕРјРµСЂ СЃС‚СЂР°РЅРёС†С‹ Рё СЃРјРµС‰РµРЅРёРµ РІРЅСѓС‚СЂРё СЃС‚СЂР°РЅРёС†С‹ РґР»СЏ СЃР»РµРґСѓСЋС‰РµР№ РїРµСЂРµРґР°С‡Рё)
 	*pci_mem=0;
-	pci_mem-=DMA_CH_CUR_POS; // в начало блока
+	pci_mem-=DMA_CH_CUR_POS; // РІ РЅР°С‡Р°Р»Рѕ Р±Р»РѕРєР°
 
-	pci_mem+=DMA_CH_PC_POS; //регистр DMA_CH_PC_POS (Указывает номер страницы и смещение внут-ри страницы за последним обработаннымпрограммой ПК словом.)
+	pci_mem+=DMA_CH_PC_POS; //СЂРµРіРёСЃС‚СЂ DMA_CH_PC_POS (РЈРєР°Р·С‹РІР°РµС‚ РЅРѕРјРµСЂ СЃС‚СЂР°РЅРёС†С‹ Рё СЃРјРµС‰РµРЅРёРµ РІРЅСѓС‚-СЂРё СЃС‚СЂР°РЅРёС†С‹ Р·Р° РїРѕСЃР»РµРґРЅРёРј РѕР±СЂР°Р±РѕС‚Р°РЅРЅС‹РјРїСЂРѕРіСЂР°РјРјРѕР№ РџРљ СЃР»РѕРІРѕРј.)
 	*pci_mem=0;
-	pci_mem-=DMA_CH_PC_POS; // в начало блока
+	pci_mem-=DMA_CH_PC_POS; // РІ РЅР°С‡Р°Р»Рѕ Р±Р»РѕРєР°
 
-	pci_mem-=DMA_OUT; //возвращаемся в начало блока памяти
-	pci_mem+=GEN_REGS_DMA+DMA_RST; //регистр DMA_RST
-	*pci_mem=0x00000003; //сброс 1-ого и 2-ого каналов
+	pci_mem-=DMA_OUT; //РІРѕР·РІСЂР°С‰Р°РµРјСЃСЏ РІ РЅР°С‡Р°Р»Рѕ Р±Р»РѕРєР° РїР°РјСЏС‚Рё
+	pci_mem+=GEN_REGS_DMA+DMA_RST; //СЂРµРіРёСЃС‚СЂ DMA_RST
+	*pci_mem=0x00000003; //СЃР±СЂРѕСЃ 1-РѕРіРѕ Рё 2-РѕРіРѕ РєР°РЅР°Р»РѕРІ
 }
 

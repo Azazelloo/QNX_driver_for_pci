@@ -1,27 +1,27 @@
-#include "Headers.h"
+п»ї#include "Headers.h"
 void StreamsStart(unsigned* pci_mem,int num_chan)
 {
-	pci_mem+=GEN_REGS_DMA+DMA_EN; //регистр запуска каналов
+	pci_mem+=GEN_REGS_DMA+DMA_EN; //СЂРµРіРёСЃС‚СЂ Р·Р°РїСѓСЃРєР° РєР°РЅР°Р»РѕРІ
 	*pci_mem=num_chan;
 
 	pci_mem-=GEN_REGS_DMA+DMA_EN;
-	//_____запуск синхронного ввода вывода
-	pci_mem+=IO_HARD+GO_SYNC_IO; //регистр GO_SYNC_IO
-	*pci_mem=0; //предварительный сброс синхронного ввода/вывода
-	pci_mem-=GO_SYNC_IO; //в начало блока
+	//_____Р·Р°РїСѓСЃРє СЃРёРЅС…СЂРѕРЅРЅРѕРіРѕ РІРІРѕРґР° РІС‹РІРѕРґР°
+	pci_mem+=IO_HARD+GO_SYNC_IO; //СЂРµРіРёСЃС‚СЂ GO_SYNC_IO
+	*pci_mem=0; //РїСЂРµРґРІР°СЂРёС‚РµР»СЊРЅС‹Р№ СЃР±СЂРѕСЃ СЃРёРЅС…СЂРѕРЅРЅРѕРіРѕ РІРІРѕРґР°/РІС‹РІРѕРґР°
+	pci_mem-=GO_SYNC_IO; //РІ РЅР°С‡Р°Р»Рѕ Р±Р»РѕРєР°
 
-	pci_mem+=OUTSWAP_BFCTL; //регистр OUTSWAP_BFCTL
+	pci_mem+=OUTSWAP_BFCTL; //СЂРµРіРёСЃС‚СЂ OUTSWAP_BFCTL
 	*pci_mem=1;
-	pci_mem-=OUTSWAP_BFCTL; // в начало блока
+	pci_mem-=OUTSWAP_BFCTL; // РІ РЅР°С‡Р°Р»Рѕ Р±Р»РѕРєР°
 
-	pci_mem+=PRELOAD_ADC; // регистр PRELOAD_ADC (записываем 1 дважды)
+	pci_mem+=PRELOAD_ADC; // СЂРµРіРёСЃС‚СЂ PRELOAD_ADC (Р·Р°РїРёСЃС‹РІР°РµРј 1 РґРІР°Р¶РґС‹)
 	*pci_mem=1;
 	*pci_mem=1;
-	pci_mem-=PRELOAD_ADC; // в начало блока
+	pci_mem-=PRELOAD_ADC; // РІ РЅР°С‡Р°Р»Рѕ Р±Р»РѕРєР°
 
-	delay(5); //задержка перед запуском потока
+	delay(5); //Р·Р°РґРµСЂР¶РєР° РїРµСЂРµРґ Р·Р°РїСѓСЃРєРѕРј РїРѕС‚РѕРєР°
 
-	pci_mem+=GO_SYNC_IO;//регистр GO_SYNC_IO
+	pci_mem+=GO_SYNC_IO;//СЂРµРіРёСЃС‚СЂ GO_SYNC_IO
 	*pci_mem=1;
 }
 

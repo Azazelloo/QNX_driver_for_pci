@@ -1,9 +1,9 @@
-#include "Headers.h"
+п»ї#include "Headers.h"
 
 int BF_loader(unsigned* pci_mem)
 {
-	//____ПРОШИВКА BLACKFIN
-	//____считываем файл прошивки, выделяем память
+	//____РџР РћРЁРР’РљРђ BLACKFIN
+	//____СЃС‡РёС‚С‹РІР°РµРј С„Р°Р№Р» РїСЂРѕС€РёРІРєРё, РІС‹РґРµР»СЏРµРј РїР°РјСЏС‚СЊ
 	int err=0,next_err=0,stop=0,rd_size=0;
 	FILE * ptrFile = fopen(BF_ldr_filename, "rb");
 	if(ptrFile==NULL)
@@ -12,24 +12,24 @@ int BF_loader(unsigned* pci_mem)
 	}
 	uint32_t* ldr_buff=new uint32_t [4096];
 
-	//____предварительный сброс и запуск bf
+	//____РїСЂРµРґРІР°СЂРёС‚РµР»СЊРЅС‹Р№ СЃР±СЂРѕСЃ Рё Р·Р°РїСѓСЃРє bf
 	pci_mem+=BF_CTL; // BF_CTL
-	*pci_mem=0x00000010 | (*pci_mem & 0xf00); // сброс BF_RST
+	*pci_mem=0x00000010 | (*pci_mem & 0xf00); // СЃР±СЂРѕСЃ BF_RST
 	delay(1);
-	*pci_mem=0x00000010 | 0x00000002 | (*pci_mem & 0xf00); // бит DSP_MODE + BF_RST (в рабочем режиме)
-	pci_mem-=BF_CTL; //в начало блока
+	*pci_mem=0x00000010 | 0x00000002 | (*pci_mem & 0xf00); // Р±РёС‚ DSP_MODE + BF_RST (РІ СЂР°Р±РѕС‡РµРј СЂРµР¶РёРјРµ)
+	pci_mem-=BF_CTL; //РІ РЅР°С‡Р°Р»Рѕ Р±Р»РѕРєР°
 
 	while(*pci_mem & 0x00000008)
 	{
 		//cout<<"BF_HWAIT..."<<endl;
-		//ожидаем нуля в бите BF_HWAIT
+		//РѕР¶РёРґР°РµРј РЅСѓР»СЏ РІ Р±РёС‚Рµ BF_HWAIT
 	}
 
-	//____разбираем заголовок блока LDR- формата и сохраняем в структуре
+	//____СЂР°Р·Р±РёСЂР°РµРј Р·Р°РіРѕР»РѕРІРѕРє Р±Р»РѕРєР° LDR- С„РѕСЂРјР°С‚Р° Рё СЃРѕС…СЂР°РЅСЏРµРј РІ СЃС‚СЂСѓРєС‚СѓСЂРµ
 	uint8_t hdr[16];
 	t_bf_ldr_pkt pkt, pkt_next;
 
-	err=fread(hdr,1,16,ptrFile)== 16 ? f_parse_ldr_hdr(hdr,&pkt): L502_ERR_LDR_FILE_READ; // читаем 16 байт заголовка ldr и парсим в структуру
+	err=fread(hdr,1,16,ptrFile)== 16 ? f_parse_ldr_hdr(hdr,&pkt): L502_ERR_LDR_FILE_READ; // С‡РёС‚Р°РµРј 16 Р±Р°Р№С‚ Р·Р°РіРѕР»РѕРІРєР° ldr Рё РїР°СЂСЃРёРј РІ СЃС‚СЂСѓРєС‚СѓСЂСѓ
 
 	 while (!err && !stop)
 	 {
@@ -39,7 +39,7 @@ int BF_loader(unsigned* pci_mem)
 		    	err = next_err;
 		    }
 
-		    else if (((pkt.flags & BF_LDR_FLAG_FILL) == 0) && (pkt.size!=0)) //чтение остатка буфера (флаг?)
+		    else if (((pkt.flags & BF_LDR_FLAG_FILL) == 0) && (pkt.size!=0)) //С‡С‚РµРЅРёРµ РѕСЃС‚Р°С‚РєР° Р±СѓС„РµСЂР° (С„Р»Р°Рі?)
 		    {
 		         int r_size = (pkt.size > 4096) ? 4096 : pkt.size;
 		         rd_size = static_cast<int>(fread(ldr_buff, 1, r_size, ptrFile));
@@ -51,14 +51,14 @@ int BF_loader(unsigned* pci_mem)
 		  //_____
 		    if(!err)
 		    {
-		    	if (pkt.size > 4096) //превышен максимальный размер буфера
-		    	{ // если переполнение буфера, то отправка пакета происходит в несколько заходов
+		    	if (pkt.size > 4096) //РїСЂРµРІС‹С€РµРЅ РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№ СЂР°Р·РјРµСЂ Р±СѓС„РµСЂР°
+		    	{ // РµСЃР»Рё РїРµСЂРµРїРѕР»РЅРµРЅРёРµ Р±СѓС„РµСЂР°, С‚Рѕ РѕС‚РїСЂР°РІРєР° РїР°РєРµС‚Р° РїСЂРѕРёСЃС…РѕРґРёС‚ РІ РЅРµСЃРєРѕР»СЊРєРѕ Р·Р°С…РѕРґРѕРІ
 		    		pkt_next = pkt;
 		    		pkt_next.addr += 4096;
 		    		pkt_next.size -= 4096;
 		    		pkt.size = 4096;
 		    	}
-		    	else //читаем 16 байт в pkt_next (следующий(!) пакет)
+		    	else //С‡РёС‚Р°РµРј 16 Р±Р°Р№С‚ РІ pkt_next (СЃР»РµРґСѓСЋС‰РёР№(!) РїР°РєРµС‚)
 		    	{
 		    		next_err= fread(hdr, 1, 16, ptrFile) == 16 ? f_parse_ldr_hdr(hdr, &pkt_next): L502_ERR_LDR_FILE_READ;
 		    		if(next_err!=0)
@@ -67,22 +67,22 @@ int BF_loader(unsigned* pci_mem)
 		    		}
 		    	}
 
-		    	if (pkt.size!=0) //если размер текущего(!) пакета не нулевой, отправляем его в bf
+		    	if (pkt.size!=0) //РµСЃР»Рё СЂР°Р·РјРµСЂ С‚РµРєСѓС‰РµРіРѕ(!) РїР°РєРµС‚Р° РЅРµ РЅСѓР»РµРІРѕР№, РѕС‚РїСЂР°РІР»СЏРµРј РµРіРѕ РІ bf
 		    	{
 		    		uint32_t size = ((pkt.size+31)/(32))*8;
 		    		if (pkt.flags & BF_LDR_FLAG_FILL)
 						 {
 							for (uint32_t i=0; i < size; i++)
 								{
-									ldr_buff[i] = pkt.arg; //заполняем буфер для отправки в память bf значениями из pkt.arg
+									ldr_buff[i] = pkt.arg; //Р·Р°РїРѕР»РЅСЏРµРј Р±СѓС„РµСЂ РґР»СЏ РѕС‚РїСЂР°РІРєРё РІ РїР°РјСЏС‚СЊ bf Р·РЅР°С‡РµРЅРёСЏРјРё РёР· pkt.arg
 								}
 						  }
-		    		if ((pkt.flags & BF_LDR_FLAG_FINAL) || ((pkt_next.flags & BF_LDR_FLAG_FINAL) && (pkt_next.size==0))) //если достигли последнего пакета для записи
+		    		if ((pkt.flags & BF_LDR_FLAG_FINAL) || ((pkt_next.flags & BF_LDR_FLAG_FINAL) && (pkt_next.size==0))) //РµСЃР»Рё РґРѕСЃС‚РёРіР»Рё РїРѕСЃР»РµРґРЅРµРіРѕ РїР°РєРµС‚Р° РґР»СЏ Р·Р°РїРёСЃРё
 		    		{
 		    			uint32_t buf_pos = 0;
 		    			err = BF_CHECK_ADDR_SIZE(pkt.addr, size);
 
-		    			//____непонятный if, но работает
+		    			//____РЅРµРїРѕРЅСЏС‚РЅС‹Р№ if, РЅРѕ СЂР°Р±РѕС‚Р°РµС‚
 		    			if (!err && (size > 8))
 		    			{
 		    				err = f_bf_mem_wr(pci_mem, pkt.addr, ldr_buff, size-8);
@@ -94,26 +94,26 @@ int BF_loader(unsigned* pci_mem)
 		    			if(!err)
 		    			{
 		    				pci_mem+=BF_CMD; //BF_CMD
-		    				*pci_mem=0x0004; // пишем команду L502_BF_CMD_HIRQ
-		    				pci_mem-=BF_CMD; //в начало блока
+		    				*pci_mem=0x0004; // РїРёС€РµРј РєРѕРјР°РЅРґСѓ L502_BF_CMD_HIRQ
+		    				pci_mem-=BF_CMD; //РІ РЅР°С‡Р°Р»Рѕ Р±Р»РѕРєР°
 		    			}
 		    			if(!err)
 		    			{
-		    				//____запись в регистры ПЛИС и отправка в память bf
+		    				//____Р·Р°РїРёСЃСЊ РІ СЂРµРіРёСЃС‚СЂС‹ РџР›РРЎ Рё РѕС‚РїСЂР°РІРєР° РІ РїР°РјСЏС‚СЊ bf
 		    				err=f_bf_mem_wr(pci_mem, pkt.addr, &ldr_buff[buf_pos], size);
 		    			}
 		    			stop=1;
 
 		    			pci_mem+=BF_CTL; //BF_CTL
 		    			*pci_mem= 0x00000012;
-		    			pci_mem-=BF_CTL; //в начало блока
+		    			pci_mem-=BF_CTL; //РІ РЅР°С‡Р°Р»Рѕ Р±Р»РѕРєР°
 		    		}
 		    		else if(!(pkt.flags & BF_LDR_FLAG_IGNORE))
 		    		{
 		    			err = BF_CHECK_ADDR_SIZE(pkt.addr, size);
 		    			if(!err)
 		    			{
-		    				//____запись в регистры ПЛИС и отправка в память bf
+		    				//____Р·Р°РїРёСЃСЊ РІ СЂРµРіРёСЃС‚СЂС‹ РџР›РРЎ Рё РѕС‚РїСЂР°РІРєР° РІ РїР°РјСЏС‚СЊ bf
 		    				err = f_bf_mem_wr(pci_mem, pkt.addr, ldr_buff, size);
 		    			}
 		    		}
